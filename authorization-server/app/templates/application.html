@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>All Applications</h2>
+    {% if applications %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Redirect URIs</th>
+                <th>Client ID</th>
+                <th>Client secret</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ app.id }}</td>
+                <td>{{ app.name }}</td>
+                <td>{{ app.description }}</td>
+                <td>
+                    <ul class="list-group">
+                        {% for uri in app.get_redirect_uris() %}
+                        <li class="list-group-item">{{ uri }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ app.client_id }}</td>
+                <td> {{ app.client_secret }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No applications found.</p>
+    <a href="{{ url_for('create_application') }}" class="btn btn-primary">Create a new application</a>
+    {% endif %}
+</div>
+{% endblock %}

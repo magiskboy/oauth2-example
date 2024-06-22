@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h2 class="text-center">OAuth2 Grant Request</h2>
+            <p class="text-center">
+                The application <strong>{{ application_name }}</strong> is requesting access to your account.
+            </p>
+            <form action="{{ url_for('authorize') }}?{{ request.query_string.decode('utf-8') }}" method="post">
+                <input type="hidden" name="application_name" value="{{ application_name }}">
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary" name="response" value="accept">Accept</button>
+                    <button type="submit" class="btn btn-danger" name="response" value="reject">Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

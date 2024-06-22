@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{{ url_for('create_application') }}" method="post" class="container">
+    <div class="form-group">
+        <label for="name">Application Name:</label>
+        <input type="text" id="name" name="name" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="redirect_uris">Redirect URIs:</label>
+        <input type="url" id="redirect_uris" name="redirect_uris" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create Application</button>
+    </div>
+</form>
+{% endblock %}
