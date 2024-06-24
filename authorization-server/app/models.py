@@ -1,13 +1,12 @@
+import secrets
+import uuid
+from datetime import datetime, timedelta
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
-from flask_migrate import Migrate
-from werkzeug.security import generate_password_hash, check_password_hash
-import uuid
-from datetime import datetime
-import secrets
-from datetime import timedelta
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
+from werkzeug.security import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -64,6 +63,9 @@ class Application(BaseModel):
 
     def verify_client_secret(self, client_secret):
         return self.client_secret == client_secret
+
+    def verify_redirect_uri(self, redirect_uri):
+        return redirect_uri in self.get_redirect_uris()
 
     @classmethod
     def create(cls, user, name, description, redirect_uris):

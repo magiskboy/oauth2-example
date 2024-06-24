@@ -11,7 +11,6 @@ from flask import (
 from sqlalchemy.exc import IntegrityError
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from base64 import urlsafe_b64encode
 from . import models, utils
 
 
@@ -150,7 +149,7 @@ def authorize():
     if not application.verify_client_secret(client_secret):
         abort(400, description="Invalid client secret")
 
-    if redirect_uri not in application.get_redirect_uris():
+    if not application.verify_redirect_uri(redirect_uri):
         abort(400, description=f"Invalid redirect URI {redirect_uri}")
 
     if request.method == "POST":
@@ -211,13 +210,34 @@ def get_access_token():
     return jsonify({"access_token": access_token, "refresh_token": refresh_token})
 
 
-def well_known():
+def refresh_token():
+    refresh_token = request.json.get("refresh_token")
+    if not refresh_token:
+        abort(400, description="Refresh token is required")
+
+    payload = utils.verify_token(refresh_token)
+    if not payload:
+        abort(400, description="Invalid refresh token")
+
+    user = models.User.query.get(payload.get("sub"))
+    application = models.Application.query.filter_by(
+        client_id=payload.get("client_id")
+    ).first()
+    access_token, refresh_token = utils.generate_token(
+        user=user,
+        scopes=payload.get("scopes"),
+        application=application,
+    )
+    return jsonify({"access_token": access_token, "refresh_token": refresh_token})
+
+
+def get_jwks():
     applications = models.Application.query.all()
     keys = []
 
-    for application in applications:
+    for app in applications:
         public_key = serialization.load_pem_public_key(
-            application.public_key_pem.encode("utf-8"), backend=default_backend()
+            app.public_key_pem.encode("utf-8"), backend=default_backend()
         )
         n = public_key.public_numbers().n
         e = public_key.public_numbers().e
@@ -226,9 +246,9 @@ def well_known():
                 "kty": "RSA",
                 "alg": "RS256",
                 "use": "sig",
-                "kid": application.client_id,
-                "n": int_to_base64url(n),
-                "e": int_to_base64url(e),
+                "kid": app.client_id,
+                "n": utils.int_to_base64url(n),
+                "e": utils.int_to_base64url(e),
             }
         )
 
@@ -236,13 +256,4 @@ def well_known():
         {
             "keys": keys,
         }
-    )
-
-
-def int_to_base64url(n):
-    # Convert integer to bytes, base64url encode, then decode to string
-    return (
-        urlsafe_b64encode(n.to_bytes((n.bit_length() + 7) // 8, "big"))
-        .decode("utf-8")
-        .rstrip("=")
     )

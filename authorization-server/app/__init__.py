@@ -17,6 +17,7 @@ def create_app():
     app.add_url_rule('/register', 'register', handlers.register, methods=['GET', 'POST'])
     app.add_url_rule('/authorize', 'authorize', handlers.authorize, methods=['GET', 'POST'])
     app.add_url_rule('/token', 'token', handlers.get_access_token, methods=['POST'])
-    app.add_url_rule('/.well-known/jwks.json', 'jwks', handlers.well_known, methods=['GET'])
+    app.add_url_rule('/refresh-token', 'refresh-token', handlers.refresh_token, methods=['POST'])
+    app.add_url_rule('/.well-known/jwks.json', 'jwks', handlers.get_jwks, methods=['GET'])
 
     return app
