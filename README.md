@@ -1,6 +1,6 @@
-# OAuth2 protocol
+# !!! Notice: purpose of this repo is education.
 
-### For learning purpose
+# OAuth2 protocol
 
 ### Start authorization server
 
